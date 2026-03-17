@@ -188,9 +188,7 @@ Their combination allows the optimizer to take larger steps on flat terrain and 
     * $\theta_{t+1} = \theta_{t+1} - η \cdot \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}$
 
     Steps 4 and 5 can be rewritten as follows:
-    * $\theta_{t+1} = \theta_{t} - η \cdot \lambda \cdot \theta_{t} - η \cdot \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon} = $
-
-        $ = \theta_{t} - η \cdot (\lambda \cdot \theta_{t} + \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon})$
+    * $\theta_{t+1} = \theta_{t} - η \cdot \lambda \cdot \theta_{t} - η \cdot \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon} = \theta_{t} - η \cdot \left(\lambda \cdot \theta_{t} + \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon} \right)$
 
 ![AdamW steps](./images/AdamW_formula.png)
 
