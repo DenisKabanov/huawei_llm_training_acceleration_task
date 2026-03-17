@@ -267,26 +267,26 @@ When fine-tuning with any optimizer (*including AdamW_8k experiment*), the **cha
 
 ### Average accuracy on benchmarks subset
 ![Average accuracy on benchmarks subset](./images/comparison_accuracy.png) <br> 
-The **change in the tracked metric** (average accuracy on subset of benchmarks) also shows a similar ***trend among all experiments, where the metric improves at 1-2 epochs, after which there is a sharp decline due to overfitting***. At the same time, training with AdamW (*AdamW, AdamW_8k, Muon_with_AdamW*) shows slightly higher accuracy than when training only with the Muon optimizer (*it should be clarified that only 72% of the model weights are trained in Muon, whereas in other experiments all 100%*).
+The **change in tracked metric** (*average accuracy on subset of benchmarks*) also shows a similar ***trend among all experiments, where the metric improves at 1-2 epochs, after which there is a sharp decline due to overfitting***. At the same time, training with AdamW (*AdamW, AdamW_8k, Muon_with_AdamW experiments*) shows slightly higher accuracy than when training only with Muon optimizer (*it should be clarified that only 72% of the model weights are trained in Muon, whereas in other experiments all 100%*).
 
 
 ### Training time and convergence
 ![Training time and convergence](./images/comparison_training_time_and_weight_convergence.png) <br> 
-The **training time** varies greatly between optimizers, where:
-1) ***AdamW optimizer are the fastest*** (even with twice the amount of input data), ~1400 seconds per 4000 samples (23 minutes per epoch) and ~3000 seconds (50 minutes per epoch with 8000 samples). The training time depends almost linearly on the amount of data.
-2) The ***Muon*** optimizer, even with only 4000 samples, spent ~ 3,800 seconds per epoch, which is just over an hour and which is almost ***3 times worse than AdamW*** on the same data.
-3) ***Combination of Muon with AdamW showed the longest training time*** (~4,100 seconds), since optimization of other weight matrices using AdamW was added to the weights optimized with Muon.
+**Training time** varies greatly between optimizers, where:
+1) ***AdamW optimizer are the fastest*** (*even with twice the amount of input data*), ~1400 seconds per 4000 samples (23 minutes per epoch) and ~3000 seconds (50 minutes per epoch with 8000 samples). The training time depends almost linearly on the amount of data.
+2) ***Muon*** optimizer, even with only 4000 samples, spent ~ 3800 seconds per epoch, which is just over an hour and which is almost ***3 times worse than AdamW*** on the same data.
+3) ***Combination of Muon with AdamW showed the longest training time*** (~4100 seconds), since optimization of other weight matrices using AdamW was added on top to the weight optimization with Muon.
 
-The **change in weights** during training also varies. 
-1) ***They changed the least when optimized by the Muon algorithm***, while the value of loss function was comparable to other optimizers. That is, to achieve similar "progress", Muon requires changing the weights by a lower value (while the loss on the test data is even better than that of other optimizers, which cannot be said about the accuracy on benchmarks). 
-3) ***The weights changed the most when training with AdamW***, with a 25% more pronounced shift in relation to Muon.
-2) Changing the weights with a ***combination of optimizers turned out to be something in between Muon and AdamW***.
+**L2 norm of change in weights** during training also varies. 
+1) ***Weights changed the least when optimized by the Muon algorithm***, while the value of loss function was comparable to other optimizers. That is, to achieve similar "progress", it is enough for Muon optimizer to make a smaller change in the weights (*while the loss on the test data is even better than that of other optimizers, which cannot be said about the accuracy on benchmarks*). 
+2) ***The weights changed the most when training with AdamW***, with a 25% more pronounced shift in relation to Muon.
+3) Changing the weights with a ***combination of optimizers turned out to be something in between Muon and AdamW***.
 
 *It is also worth to note that with more data, the more the weights of the model changed (according to experiments with 4000 and 8000 samples).*
 
 ![Mean epoch time](./images/comparison_mean_time.png) <br> 
 ![Time before best accuracy](./images/comparison_epochs_best.png) <br> 
-***It took only one epoch for the models to be fine-tuned to the best accuracy on the benchmarks*** at 4,000 samples. *If training on more data, then along with the increase of computing time, the accuracy will also be higher.*
+***It took only one epoch for the models to be fine-tuned to the best accuracy on the benchmarks*** at 4000 samples. *If training on more data, then along with the increase of computing time, the accuracy will also be higher.*
 
 
 ### GPU memory usage
@@ -297,15 +297,15 @@ Memory usage depends only on the type of optimizer and does not depend on the da
 
 GPU allocated memory after an epoch:
 * ***The highest for the AdamW optimizer***, since it stores two moments at once for each trainable weights (the moving average of the gradients and the moving average of the squares of the gradients). It takes up 3.28 GB with the model.
-* After the fine-tuning epoch, ***Muon frees up more memory***, by about 33%, compared to AdamW. Occupying only 3.28 GB with the model.
-* The **combination of Muon and AdamW has average consumption** (4.29 GB), after training they take up 15% less memory compared to AdamW, and 30% more when compared with only Muon.
+* After one fine-tuning epoch, ***Muon frees up more memory***, by about 33%, compared to AdamW. Occupying only 3.28 GB with the model.
+* The ***combination of Muon and AdamW has average consumption*** (4.29 GB), after training they take up 15% less memory compared to AdamW, and 30% more when compared with only Muon.
 
 Reserved (cached) GPU memory:
-* Similarly, the AdamW optimizer reserves the most memory, 8.55 GB.
+* Similarly, AdamW optimizer reserves the most memory, 8.55 GB.
 * One Muon reserves 20% less memory (6.84 GB).
 * The combination of optimizers again has an intermediate value (7.73 GB), 10% less than AdamW, but 13% more than Muon.
 
-**Maximum GPU allocated memory during epoch training**:
+**Maximum GPU allocated memory during training epoch**:
 * ***AdamW has the highest***, 7.65 GB.
 * ***Muon consumes 20% less GPU memory*** (6.13 GB) than AdamW during training.
 * The optimizer combination consumes 6.98 GB, which is 9% less and 14% more than AdamW and Muon, respectively.
@@ -315,24 +315,31 @@ Reserved (cached) GPU memory:
 Validation data is the following datasets that evaluate the understanding of the model of physical properties and logical relationships between objects, as well as the possibilities of commonsense reasoning:
 1) [PIQA](https://github.com/EleutherAI/lm-evaluation-harness/tree/main/lm_eval/tasks/piqa) (Physical Interaction: Question Answering) — benchmark for determining how well a language model understands the physical properties of objects (*fragility, hardness*) and everyday actions (*how best to wash dishes or place an object*). 
 2) [ARC easy](https://github.com/EleutherAI/lm-evaluation-harness/tree/main/lm_eval/tasks/arc) (AI2 Reasoning Easy) — benchmark created to evaluate the ability of artificial intelligence systems to answer questions that require basic scientific knowledge and logic. The set consists of multiple-answer questions taken from real school science exams (grades 3-9). The "Easy" category includes questions that modern (at the time of creation) models could answer using simple statistical methods or keyword search.
-3) [ARC challenge](https://github.com/EleutherAI/lm-evaluation-harness/tree/main/lm_eval/tasks/arc) (AI2 Reasoning Challenge) — structurally similar to "ARC easy", but it contains more difficult questions that require "multi-layered" reasoning to answer.
-4) [WinoGrande](https://github.com/EleutherAI/lm-evaluation-harness/tree/main/lm_eval/tasks/winogrande) — benchmark designed to evaluate ability of artificial intelligence models to reason based on common sense (commonsense reasoning). The benchmark is based on tasks like the Winograd Schema Challenge (WSC), where model needs to correctly correlate a pronoun with one of two objects mentioned in the sentence. For example, there is an expression "The trophy did not fit in a brown suitcase because *** was too big." The model needs to choose correct answer from a suggested ones. Options: A) Trophy; B) Suitcase. The correct answer is: A (Trophy).
-5) [HellaSwag](https://github.com/EleutherAI/lm-evaluation-harness/tree/main/lm_eval/tasks/hellaswag) (Harder Entities, Longer Contexts, and Better Adversarial Filtering) — benchmark created to evaluate the commonsense reasoning abilities of large language models (LLM). The benchmark checks how well the model can predict the most logical outcome of an everyday scenario. Unlike simple tests, HellaSwag uses Adversarial Filtering method: the answer options are generated so that they look plausible to algorithms, but are obviously incorrect to humans. Model gets a context (for example, a description of the beginning of a video clip) and four continuation options. The task is to choose the right one. Tasks are chosen so that they are easy for humans (accuracy ~ 95%), but for a long time remained extremely difficult for AI.
+3) [ARC challenge](https://github.com/EleutherAI/lm-evaluation-harness/tree/main/lm_eval/tasks/arc) (AI2 Reasoning Challenge) — structurally similar to "ARC easy", but contains more difficult questions that require "multi-layered" reasoning to answer.
+4) [WinoGrande](https://github.com/EleutherAI/lm-evaluation-harness/tree/main/lm_eval/tasks/winogrande) — benchmark designed to evaluate ability of artificial intelligence models to reason based on common sense (commonsense reasoning). The benchmark is based on tasks like the Winograd Schema Challenge (WSC), where the model needs to correctly correlate a pronoun with one of two objects mentioned in the sentence. For example, there is an expression "The trophy did not fit in a brown suitcase because *** was too big." The model needs to choose correct answer from a suggested ones. Options: A) Trophy; B) Suitcase. The correct answer is: A (Trophy).
+5) [HellaSwag](https://github.com/EleutherAI/lm-evaluation-harness/tree/main/lm_eval/tasks/hellaswag) (Harder Entities, Longer Contexts, and Better Adversarial Filtering) — benchmark created to evaluate the commonsense reasoning abilities of large language models (LLM). The benchmark checks how well the model can predict the most logical outcome of an everyday scenario. Unlike simple tests, HellaSwag uses the Adversarial Filtering method: the answer options are generated so that they look plausible to algorithms, but are obviously incorrect to humans. The model gets a context (for example, a description of the beginning of a video clip) and four continuation options. The task is to choose the right one. Tasks are chosen so that they are easy for humans (accuracy ~ 95%), but for a long time remained extremely difficult for AI.
 
 The main metric of all benchmarks is **Accuracy**, that is, the indexes of answers predicted by a model (0, 1, ...) are compared with true label. The higher the Accuracy, the better the model understands essence of the sentence. To do this, CausalLM model is used to estimate logarithmic probability (log-likelihood) of each of the response options. The model "chooses" option that is more likely to be generated with a given context (input).
 
 ![Benchmarks Accuracy](./images/comparison_benchmarks.png) <br> 
 Comparing **Accuracy on benchmarks**, it can be seen that:
-* ***The best metrics, as expected, were shown by experiment with the largest number of samples*** (8000 versus 4000 for all other optimizers). It surpassed "baseline" (model without fine-tuning) in all benchmarks by 0.2 — 1.2% Accuracy. 
-* ***AdamW***, trained on 4,000 samples, ***ranks second*** in terms of Accuracy. He even managed to slightly (by ~0.001 — 0.003, which is less than half a percent) overtake AdamW on "arc_easy" and "piqa" benchmarks.
+* ***The best metrics, as expected, were shown by experiment with the largest number of samples*** (8000 versus 4000 for all other optimizers). It surpassed the "baseline" (model without fine-tuning) in all benchmarks by 0.2 — 1.2% Accuracy. 
+* ***AdamW***, trained on 4000 samples, ***ranks second*** in terms of Accuracy. He even managed to slightly (by ~0.001 — 0.003, which is less than half a percent) overtake AdamW_8k on "arc_easy" and "piqa" benchmarks.
 * ***The combination of optimizers showed the most unstable metrics***, for benchmarks "arc_easy" and "winogrande" there is a relatively good increase in Accuracy, while for "hellaswag" and "piqa" model performed worse than its untrained version.
 * One ***Muon showed the worst results***, in two benchmarks it was worse than untrained model ("arc_challenge" and "hellaswag"), and in the other three it was only slightly better ("arc_easy", "piqa", "winogrande").
 
 
 ## Conclusion
+**Key Findings**:
 * The ***final quality of a model is more influenced by amount of data than a type of optimizer*** (*although fune-tuning with Muon showed almost no improvement in Accuracy*).
 * The ***convergence of models with respect to the loss function is almost the same for optimizers***, but not according to L2 norm of updated model's weights, they change the most with AdamW optimizer, the weakest with Muon (*while their loss is almost the same*).
 * ***Muon is running much slower*** (*3 times*) than AdamW (*although this may be due to the architecture of a model*).
 * ***Muon requires less memory*** (*by ~20% compared to AdamW*), as it stores only one additional matrix for weights (Momentum).
 * There are perspectives for Muon related to increasing the batch size and learning rate.
 * ***The combination of optimizers shows intermediate results*** in all analysis, except for training time, where fine-tuning took the longest.
+
+**Opportunities for further research**:
+* Using the MeZO optimizer;
+* Training on full dataset;
+* Using a model for which orthogonalization of matrices would be more profitable and faster than calculating gradients;
+* Increase the learning rate and batch size.
