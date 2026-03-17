@@ -188,7 +188,7 @@ Their combination allows the optimizer to take larger steps on flat terrain and 
     * $\theta_{t+1} = \theta_{t+1} - η \cdot \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}$
 
     Steps 4 and 5 can be rewritten as follows:
-    * $\theta_{t+1} = \theta_{t} - η \cdot \lambda \cdot \theta_{t} - η \cdot \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon} = \theta_{t} - η \cdot (\lambda \cdot \theta_{t} + \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon})$
+    * $$\theta_{t+1} = \theta_{t} - η \cdot \lambda \cdot \theta_{t} - η \cdot \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon} = \theta_{t} - η \cdot (\lambda \cdot \theta_{t} + \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon})$$
 
 ![AdamW steps](./images/AdamW_formula.png)
 
@@ -218,7 +218,7 @@ Ordinary gradients often contain redundancy, due to which many directions in the
     * $m_t = μ \cdot m_{t-1} + g_t$
 
     If we use Nesterov's Momentum, then:
-    * $m_t = μ^2 \cdot m_{t-1} + (1 + μ) g_t$
+    * $m_t = μ^2 \cdot m_{t-1} + (1 + μ) \cdot g_t$
 3) Calculation of orthogonalization of the gradient matrix $O_t$, for which Muon takes the matrix of accumulated gradients and applies the Newton-Schultz iterative procedure to it to obtain an approximation (instead of the classical SVD decomposition, which is computationally expensive):
     * $O_t = NS_k^{(a,b,c)}(m_t; \epsilon)$
     
