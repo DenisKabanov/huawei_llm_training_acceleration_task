@@ -165,6 +165,8 @@ Their combination allows the optimizer to take larger steps on flat terrain and 
 4) After scaling, the model weights are updated ($η$ — learning rate, $\epsilon$ — minimum addition so that there is no zero in the denominator):
     * $\theta_{t+1} = \theta_t - η * \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}$
 
+![Adam steps](./images/Adam_formula.png) 
+
 ***The difference between AdamW and Adam lies in the place of application of L2 regularization*** (weight decay). When standard Adam applies regularization directly to gradients (see step 1 of the calculation, which can lead to undesirable effects), ***AdamW does this separately, at the parameter update level***, and not at the gradient level. In this way, AdamW implements the weight decay concept more accurately, which can lead to better learning outcomes. In other words, an additional step is added to AdamW (replacing the moment with L2-regularization).
 
 ***The AdamW algorithm:***
@@ -186,9 +188,8 @@ Their combination allows the optimizer to take larger steps on flat terrain and 
     * $\theta_{t+1} = \theta_{t+1} - η * \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}$
 
     Steps 4 and 5 can be rewritten as follows:
-    * $\theta_{t+1} = \theta_{t} - η * \lambda * \theta_{t} - η * \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon} = \theta_{t} - η * (\lambda * \theta_{t} + \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon})$
+    * $\theta_{t+1} = \theta_{t} - η * \lambda * \theta_{t} - η * \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}$ = $\theta_{t} - η * (\lambda * \theta_{t} + \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon})$
 
-![Adam steps](./images/Adam_formula.png) 
 ![AdamW steps](./images/AdamW_formula.png)
 
 Advantages of the AdamW optimizer:
