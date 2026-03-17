@@ -153,17 +153,17 @@ Their combination allows the optimizer to take larger steps on flat terrain and 
     * $g_t = ∇_{\theta}L(\theta_t)$
 
     **If L2-regularization is applied** ($\lambda$ is the regularization coefficient, weight decay), then the gradient of $g_t$ is considered as:
-    * $g_t = ∇_{\theta}L(\theta_t) + \lambda * \theta_{t-1}$
+    * $g_t = ∇_{\theta}L(\theta_t) + \lambda \cdot \theta_{t-1}$
 2) The moments are updated (using exponential attenuation ~ so that the "old" gradients are forgotten and the "new" ones have more weight):
-    * $m_t = \beta_1 * m_{t-1} + (1 - \beta_1) * g_t$
-    * $v_t = \beta_2 * v_{t-1} + (1 - \beta_2) * g_t^2$ 
+    * $m_t = \beta_1 \cdot m_{t-1} + (1 - \beta_1) \cdot g_t$
+    * $v_t = \beta_2 \cdot v_{t-1} + (1 - \beta_2) \cdot g_t^2$ 
 
     $\beta_1$ (usually 0.9) determines how much we trust past experience. $\beta_2$ (usually 0.999) is responsible for the "memory" of gradient volatility.
 3) Bias Correction. Due to the fact that at the very beginning of training $m_t$ and $v_t$ are equal to 0, they "accelerate" for a long time and tend to zero. To fix this, they are scaled (due to which, for small $t>0$, their values are several times larger than they should be, but as $t$ increases, $\beta^t$ decreases, and therefore the scaling factor tends to 1):
     * $\hat{m}_t = \frac{m_t}{1-\beta_1^t}$
     * $\hat{v}_t = \frac{v_t}{1-\beta_2^t}$
 4) After scaling, the model weights are updated ($η$ — learning rate, $\epsilon$ — minimum addition so that there is no zero in the denominator):
-    * $\theta_{t+1} = \theta_t - η * \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}$
+    * $\theta_{t+1} = \theta_t - η \cdot \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}$
 
 ![Adam steps](./images/Adam_formula.png) 
 
@@ -175,20 +175,20 @@ Their combination allows the optimizer to take larger steps on flat terrain and 
 1) The gradient $g_t$ (the derivative of the loss function with respect to the current weight $\theta$) is calculated using the formula:
     * $g_t = ∇_{\theta}L(\theta_t)$
 2) The moments are updated (using exponential attenuation ~ so that the "old" gradients are forgotten and the "new" ones have more weight):
-    * $m_t = \beta_1 * m_{t-1} + (1 - \beta_1) * g_t$
-    * $v_t = \beta_2 * v_{t-1} + (1 - \beta_2) * g_t^2$ 
+    * $m_t = \beta_1 \cdot m_{t-1} + (1 - \beta_1) \cdot g_t$
+    * $v_t = \beta_2 \cdot v_{t-1} + (1 - \beta_2) \cdot g_t^2$ 
 
     $\beta_1$ (usually 0.9) determines how much we trust past experience. $\beta_2$ (usually 0.999) is responsible for the "memory" of gradient volatility.
 3) Bias Correction. Due to the fact that at the very beginning of training $m_t$ and $v_t$ are equal to 0, they "accelerate" for a long time and tend to zero. To fix this, they are scaled (due to which, for small $t>0$, their values are several times larger than they should be, but as $t$ increases, $\beta^t$ decreases, and therefore the scaling factor tends to 1):
     * $\hat{m}_t = \frac{m_t}{1-\beta_1^t}$
     * $\hat{v}_t = \frac{v_t}{1-\beta_2^t}$
 4) **Regularization is applied to weights** $\theta$ ($\lambda$ is the regularization coefficient, weight decay):
-    * $\theta_{t+1} = \theta_{t} - η * \lambda * \theta_{t}$
+    * $\theta_{t+1} = \theta_{t} - η \cdot \lambda \cdot \theta_{t}$
 5) The stage of updating the model weights ($η$ — learning rate, $\epsilon$ — minimum addition so that there is no zero in the denominator):
-    * $\theta_{t+1} = \theta_{t+1} - η * \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}$
+    * $\theta_{t+1} = \theta_{t+1} - η \cdot \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}$
 
     Steps 4 and 5 can be rewritten as follows:
-    * $\theta_{t+1} = \theta_{t} - η * \lambda * \theta_{t} - η * \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}$ = $\theta_{t} - η * (\lambda * \theta_{t} + \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon})$
+    * $\theta_{t+1} = \theta_{t} - η \cdot \lambda \cdot \theta_{t} - η \cdot \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon} = \theta_{t} - η \cdot (\lambda \cdot \theta_{t} + \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon})$
 
 ![AdamW steps](./images/AdamW_formula.png)
 
@@ -215,10 +215,10 @@ Ordinary gradients often contain redundancy, due to which many directions in the
 1) The gradient $g_t$ (the derivative of the loss function with respect to the current weight $\theta$) is calculated using the formula:
     * $g_t = ∇_{\theta}L(\theta_t)$
 2) Consideration of Momentum, which makes it possible to smooth out noise and keep the inertia of movement (in a different way than in Adam) to a minimum of the loss function (coefficient $μ$, in Adam it is $\beta_1$ ~ how much do we trust past experience):
-    * $m_t = μ * m_{t-1} + g_t$
+    * $m_t = μ \cdot m_{t-1} + g_t$
 
     If we use Nesterov's Momentum, then:
-    * $m_t = μ^2 * m_{t-1} + (1 + μ) g_t$
+    * $m_t = μ^2 \cdot m_{t-1} + (1 + μ) g_t$
 3) Calculation of orthogonalization of the gradient matrix $O_t$, for which Muon takes the matrix of accumulated gradients and applies the Newton-Schultz iterative procedure to it to obtain an approximation (instead of the classical SVD decomposition, which is computationally expensive):
     * $O_t = NS_k^{(a,b,c)}(m_t; \epsilon)$
     
@@ -226,13 +226,13 @@ Ordinary gradients often contain redundancy, due to which many directions in the
     
     Due to this, the product of the matrix itself is $OO^T \approx 1$, all singular values of the matrix become equal to 1, which removes the problem of different gradient scales for different layers and parameters.
 4) **Appling L2 regularization to weights** ($\lambda$ is the regularization coefficient or weight decay, $η$ — initial learning rate):
-    * $\theta_{t+1} = \theta_{t} - η * \lambda * \theta_{t}$
+    * $\theta_{t+1} = \theta_{t} - η \cdot \lambda \cdot \theta_{t}$
 5) Recalculation the update step $η$ (learning rate) depending on the dimension of the weight matrix (so that the orthogonalized update has a consistent RMS value for rectangular matrices) and taking into account the orthogonal gradient matrix for updating the weights:
     * $η = AdjustLR(η; shape(\theta_t))$
-    * $\theta_{t+1} = \theta_{t+1} - η * O_t$
+    * $\theta_{t+1} = \theta_{t+1} - η \cdot O_t$
 
     Steps 4 and 5 can be rewritten as follows:
-    * $\theta_{t+1} = \theta_{t} - η * \lambda * \theta_{t} - AdjustLR(η; shape(\theta_t)) * O_t$
+    * $\theta_{t+1} = \theta_{t} - η \cdot \lambda \cdot \theta_{t} - AdjustLR(η; shape(\theta_t)) \cdot O_t$
 
 ![Muon steps](./images/Muon_formula.png)
 
