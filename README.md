@@ -140,7 +140,7 @@ II) Locally:
 
 ## Fine-tuning results
 ### Adam and AdamW definition:
-**Adam** optimizer (Adaptive Moment Estimation) — an algorithm for optimizing the weights of neural networks based on the backpropagation of error (gradient) and combining ideas from Stochastic Gradient Descent (***Momentum***) and RMSProp (***individual step for each parameter***). *The algorithm stores in memory two moments (matrices) **for each trainable parameter** of the model*:
+**Adam** optimizer (Adaptive Moment Estimation) — an algorithm for optimizing the weights of neural networks based on the backpropagation of error (gradient) and combining ideas from Nesterov Accelerated Gradient (***Momentum***) and RMSProp (***individual step for each parameter***). *The algorithm stores in memory two moments (matrices) **for each trainable parameter** of the model*:
 1. The first moment (aka the moving average of the gradient, $m_t$) is an analogue of Momentum, which helps not to get stuck in local minima.
 2. The second moment (aka the moving average of the square of the gradient, $v_t$) is an analogue of adaptive velocity, it helps to reduce the step where the gradients are very sharp and increase where they are flat.
 
