@@ -140,7 +140,7 @@ II) Locally:
 
 ## Fine-tuning results
 ### Adam and AdamW definition:
-**Adam** optimizer (Adaptive Moment Estimation) — an algorithm for optimizing the weights of neural networks based on the backpropagation of error (gradient) and combining ideas from AdaGrad (***Momentum***) and RMSProp (***individual step for each parameter***). *The algorithm stores in memory two moments (matrices) **for each trainable parameter** of the model*:
+**Adam** optimizer (Adaptive Moment Estimation) — an algorithm for optimizing the weights of neural networks based on the backpropagation of error (gradient) and combining ideas from Stochastic Gradient Descent (***Momentum***) and RMSProp (***individual step for each parameter***). *The algorithm stores in memory two moments (matrices) **for each trainable parameter** of the model*:
 1. The first moment (aka the moving average of the gradient, $m_t$) is an analogue of Momentum, which helps not to get stuck in local minima.
 2. The second moment (aka the moving average of the square of the gradient, $v_t$) is an analogue of adaptive velocity, it helps to reduce the step where the gradients are very sharp and increase where they are flat.
 
@@ -148,12 +148,12 @@ Their combination allows the optimizer to take larger steps on flat terrain and 
 
 ***The Adam algorithm*** consists of the following steps (at each iteration $t$, the following calculations are performed for each parameter $\theta$):
 
-0) Initially, at $t=0$, $m_t$ (or $m_0$) and $v_t$ (or $v_0$) for the weight matrices are zero.
+0) Initially, at $t=0$, moments $m_t$ (or $m_0$) and $v_t$ (or $v_0$) for the weight matrices are zero.
 1) The gradient $g_t$ (the derivative of the loss function with respect to the current weight $\theta$) is calculated using the formula:
     * $g_t = ∇_{\theta}L(\theta_t)$
 
     **If L2-regularization is applied** ($\lambda$ is the regularization coefficient, weight decay), then the gradient of $g_t$ is considered as:
-    * $g_t = ∇_{\theta}L(\theta_t) + \lambda \cdot \theta_{t-1}$
+    * $g_t = ∇_{\theta}L(\theta_t) + \lambda \cdot \theta_{t}$
 2) The moments are updated (using exponential attenuation ~ so that the "old" gradients are forgotten and the "new" ones have more weight):
     * $m_t = \beta_1 \cdot m_{t-1} + (1 - \beta_1) \cdot g_t$
     * $v_t = \beta_2 \cdot v_{t-1} + (1 - \beta_2) \cdot g_t^2$ 
@@ -171,7 +171,7 @@ Their combination allows the optimizer to take larger steps on flat terrain and 
 
 ***The AdamW algorithm:***
 
-0) Initially, at $t=0$, $m_t$ (or $m_0$) and $v_t$ (or $v_0$) for the weight matrices are zero.
+0) Initially, at $t=0$, moments $m_t$ (or $m_0$) and $v_t$ (or $v_0$) for the weight matrices are zero.
 1) The gradient $g_t$ (the derivative of the loss function with respect to the current weight $\theta$) is calculated using the formula:
     * $g_t = ∇_{\theta}L(\theta_t)$
 2) The moments are updated (using exponential attenuation ~ so that the "old" gradients are forgotten and the "new" ones have more weight):
@@ -188,7 +188,7 @@ Their combination allows the optimizer to take larger steps on flat terrain and 
     * $\theta_{t+1} = \theta_{t+1} - η \cdot \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}$
 
     Steps 4 and 5 can be rewritten as follows:
-    <!-- * $\theta_{t+1} = \theta_{t} - η \cdot \lambda \cdot \theta_{t} - η \cdot \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon} = \theta_{t} - η \cdot \left(\lambda \cdot \theta_{t} + \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon} \right)$ -->
+    <!-- * $\theta_{t+1} = \theta_{t} - η \cdot \lambda \cdot \theta_{t} - η \cdot \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon} = \theta_{t} - η \cdot \left(\frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon} + \lambda \cdot \theta_{t} \right)$ -->
     * ![Formula that don't render](./images/step_4_and_5.png)
 
 ![AdamW steps](./images/AdamW_formula.png)
@@ -295,7 +295,7 @@ The **change in tracked metric** (*average accuracy on subset of benchmarks*) al
 3) ***Combination of Muon with AdamW showed the longest training time*** (~4100 seconds), since optimization of other weight matrices using AdamW was added on top to the weight optimization with Muon.
 
 **L2 norm of change in weights** during training also varies. 
-1) ***Weights changed the least when optimized by the Muon algorithm***, while the value of loss function was comparable to other optimizers. That is, to achieve similar "progress", it is enough for Muon optimizer to make a smaller change in the weights (*while the loss on the test data is even better than that of other optimizers, which cannot be said about the accuracy on benchmarks*). 
+1) ***Weights changed the least when optimized by the Muon algorithm***, while the value of loss function was comparable to other optimizers. That is, to achieve similar "progress", it is enough for Muon optimizer to change a smaller number of weights (only 72% are trained, not 100%) and to a lower value (*while the loss on the test data is even better than that of other optimizers, which cannot be said about the accuracy on benchmarks*). 
 2) ***The weights changed the most when training with AdamW***, with a 25% more pronounced shift in relation to Muon.
 3) Changing the weights with a ***combination of optimizers turned out to be something in between Muon and AdamW***.
 
@@ -313,7 +313,7 @@ Between epochs, GPU memory usage remains almost unchanged (for each optimizer), 
 Memory usage depends only on the type of optimizer and does not depend on the dataset size (since only a fixed-size batch is loaded at one time).
 
 GPU allocated memory after an epoch:
-* ***The highest for the AdamW optimizer***, since it stores two moments at once for each trainable weights (the moving average of the gradients and the moving average of the squares of the gradients). It takes up 3.28 GB with the model.
+* ***The highest for the AdamW optimizer***, since it stores two moments at once for each trainable weights (the moving average of the gradients and the moving average of the squares of the gradients). It takes up 4.96 GB with the model.
 * After one fine-tuning epoch, ***Muon frees up more memory***, by about 33%, compared to AdamW. Occupying only 3.28 GB with the model.
 * The ***combination of Muon and AdamW has average consumption*** (4.29 GB), after training they take up 15% less memory compared to AdamW, and 30% more when compared with only Muon.
 
@@ -349,9 +349,9 @@ Comparing **Accuracy on benchmarks**, it can be seen that:
 ## Conclusion
 **Key Findings**:
 * The ***final quality of a model is more influenced by amount of data than a type of optimizer*** (*although fune-tuning with Muon showed almost no improvement in Accuracy*).
-* The ***convergence of models with respect to the loss function is almost the same for optimizers***, but not according to L2 norm of updated model's weights, they change the most with AdamW optimizer, the weakest with Muon (*while their loss is almost the same*).
+* The ***convergence of models with respect to the loss function is almost the same for optimizers***, but not according to L2 norm of updated model's weights, they change the most with AdamW optimizer, the weakest with Muon since not all parameters are trained (*while their loss is almost the same*).
 * ***Muon is running much slower*** (*3 times*) than AdamW (*although this may be due to the architecture of a model*).
-* ***Muon requires less memory*** (*by ~20% compared to AdamW*), as it stores only one additional matrix for weights (Momentum).
+* ***Muon requires less memory*** (*by ~20% compared to AdamW*), as it stores only one additional matrix for weights (Momentum) and it doesn't fine-tune all the parameters.
 * There are perspectives for Muon related to increasing the batch size and learning rate.
 * ***The combination of optimizers shows intermediate results*** in all analysis, except for training time, where fine-tuning took the longest.
 
